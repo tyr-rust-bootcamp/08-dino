@@ -27,32 +27,6 @@ pub struct ImportMap {
 }
 
 lazy_static! {
-    pub static ref CORE_MODULES: HashMap<&'static str, &'static str> = {
-        let modules = vec![
-            ("console", include_str!("../js/console.js")),
-            ("events", include_str!("../js/events.js")),
-            ("process", include_str!("../js/process.js")),
-            ("timers", include_str!("../js/timers.js")),
-            ("assert", include_str!("../js/assert.js")),
-            ("util", include_str!("../js/util.js")),
-            ("fs", include_str!("../js/fs.js")),
-            ("perf_hooks", include_str!("../js/perf-hooks.js")),
-            ("colors", include_str!("../js/colors.js")),
-            ("dns", include_str!("../js/dns.js")),
-            ("net", include_str!("../js/net.js")),
-            ("test", include_str!("../js/test.js")),
-            ("stream", include_str!("../js/stream.js")),
-            ("http", include_str!("../js/http.js")),
-            ("@web/abort", include_str!("../js/abort-controller.js")),
-            ("@web/text_encoding", include_str!("../js/text-encoding.js")),
-            ("@web/clone", include_str!("../js/structured-clone.js")),
-            ("@web/fetch", include_str!("../js/fetch.js")),
-        ];
-        HashMap::from_iter(modules.into_iter())
-    };
-}
-
-lazy_static! {
   // Windows absolute path regex validator.
   static ref WINDOWS_REGEX: Regex = Regex::new(r"^[a-zA-Z]:\\").unwrap();
   // URL regex validator (string begins with http:// or https://).
@@ -63,13 +37,10 @@ lazy_static! {
 pub fn load_import(specifier: &str, skip_cache: bool) -> Result<ModuleSource> {
     // Look the params and choose a loader.
     let loader: Box<dyn ModuleLoader> = match (
-        CORE_MODULES.contains_key(specifier),
         WINDOWS_REGEX.is_match(specifier),
         Url::parse(specifier).is_ok(),
     ) {
-        (true, _, _) => Box::new(CoreModuleLoader),
-        (_, true, _) => Box::new(FsModuleLoader),
-        (_, _, true) => Box::new(UrlModuleLoader { skip_cache }),
+        (_, true) => Box::new(UrlModuleLoader { skip_cache }),
         _ => Box::new(FsModuleLoader),
     };
 
@@ -81,7 +52,6 @@ pub fn load_import(specifier: &str, skip_cache: bool) -> Result<ModuleSource> {
 pub fn resolve_import(
     base: Option<&str>,
     specifier: &str,
-    ignore_core_modules: bool,
     import_map: Option<ImportMap>,
 ) -> Result<ModulePath> {
     // Use import-maps if available.
@@ -92,39 +62,21 @@ pub fn resolve_import(
 
     // Look the params and choose a loader.
     let loader: Box<dyn ModuleLoader> = {
-        let is_core_module_import = CORE_MODULES.contains_key(specifier.as_str());
         let is_url_import = URL_REGEX.is_match(&specifier)
             || match base {
                 Some(base) => URL_REGEX.is_match(base),
                 None => false,
             };
 
-        match (is_core_module_import, is_url_import) {
-            (true, _) if !ignore_core_modules => Box::new(CoreModuleLoader),
-            (_, true) => Box::<UrlModuleLoader>::default(),
-            _ => Box::new(FsModuleLoader),
+        if is_url_import {
+            Box::<UrlModuleLoader>::default()
+        } else {
+            Box::new(FsModuleLoader)
         }
     };
 
     // Resolve module.
     loader.resolve(base, &specifier)
-}
-
-#[derive(Default)]
-pub struct CoreModuleLoader;
-
-impl ModuleLoader for CoreModuleLoader {
-    fn resolve(&self, _: Option<&str>, specifier: &str) -> Result<ModulePath> {
-        match CORE_MODULES.get(specifier) {
-            Some(_) => Ok(specifier.to_string()),
-            None => bail!(format!("Module not found \"{specifier}\"")),
-        }
-    }
-    fn load(&self, specifier: &str) -> Result<ModuleSource> {
-        // Since any errors will be caught at the resolve stage, we can
-        // go ahead an unwrap the value with no worries.
-        Ok(CORE_MODULES.get(specifier).unwrap().to_string())
-    }
 }
 
 static EXTENSIONS: &[&str] = &["js", "ts", "json"];
