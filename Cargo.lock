@@ -754,6 +754,7 @@ dependencies = [
  "serde_yaml",
  "thiserror",
  "tokio",
+ "tower",
  "tracing",
  "tracing-subscriber",
  "typed-builder",
