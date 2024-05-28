@@ -723,6 +723,7 @@ dependencies = [
  "git2",
  "glob",
  "tokio",
+ "tracing",
  "tracing-subscriber",
 ]
 

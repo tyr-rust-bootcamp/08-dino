@@ -1,4 +1,5 @@
 use anyhow::Result;
+use axum::{body::Body, response::Response};
 use dino_macros::{FromJs, IntoJs};
 use rquickjs::{Context, Function, Object, Promise, Runtime};
 use std::collections::HashMap;
@@ -12,13 +13,17 @@ pub struct JsWorker {
 
 #[derive(Debug, TypedBuilder, IntoJs)]
 pub struct Req {
-    #[builder(default)]
-    pub headers: HashMap<String, String>,
     #[builder(setter(into))]
     pub method: String,
     #[builder(setter(into))]
     pub url: String,
-    #[builder(default, setter(strip_option))]
+    #[builder(default)]
+    pub query: HashMap<String, String>,
+    #[builder(default)]
+    pub params: HashMap<String, String>,
+    #[builder(default)]
+    pub headers: HashMap<String, String>,
+    #[builder(default)]
     pub body: Option<String>,
 }
 
@@ -64,34 +69,19 @@ impl JsWorker {
     }
 }
 
-// impl<'js> IntoJs<'js> for Request {
-//     fn into_js(self, ctx: &Ctx<'js>) -> rquickjs::Result<Value<'js>> {
-//         let obj = Object::new(ctx.clone())?;
-
-//         obj.set("headers", self.headers)?;
-//         obj.set("method", self.method)?;
-//         obj.set("url", self.url)?;
-//         obj.set("body", self.body)?;
-
-//         Ok(obj.into())
-//     }
-// }
-
-// impl<'js> FromJs<'js> for Response {
-//     fn from_js(_ctx: &Ctx<'js>, v: Value<'js>) -> rquickjs::Result<Self> {
-//         let obj = v.into_object().unwrap();
-
-//         let status: u16 = obj.get("status")?;
-//         let headers: HashMap<String, String> = obj.get("headers")?;
-//         let body: Option<String> = obj.get("body")?;
-
-//         Ok(Response {
-//             status,
-//             headers,
-//             body,
-//         })
-//     }
-// }
+impl From<Res> for Response {
+    fn from(res: Res) -> Self {
+        let mut builder = Response::builder().status(res.status);
+        for (k, v) in res.headers {
+            builder = builder.header(k, v);
+        }
+        if let Some(body) = res.body {
+            builder.body(body.into()).unwrap()
+        } else {
+            builder.body(Body::empty()).unwrap()
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
