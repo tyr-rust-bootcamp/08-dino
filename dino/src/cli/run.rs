@@ -22,10 +22,9 @@ impl CmdExector for RunOpts {
         let code = fs::read_to_string(filename)?;
         let config = ProjectConfig::load(config)?;
 
-        let routers = vec![TenentRouter::new(
-            "localhost",
-            SwappableAppRouter::try_new(&code, config.routes)?,
-        )];
+        let router = SwappableAppRouter::try_new(&code, config.routes)?;
+        let routers = vec![TenentRouter::new("localhost", router.clone())];
+
         start_server(self.port, routers).await?;
 
         Ok(())
