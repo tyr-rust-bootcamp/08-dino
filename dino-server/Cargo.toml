@@ -8,14 +8,17 @@ anyhow = "1.0.86"
 arc-swap = "1.7.1"
 axum = { version = "0.7.5", features = ["http2", "query", "tracing"] }
 dashmap = "5.5.3"
+dino-macros = { workspace = true }
 indexmap = { version = "2.2.6", features = ["serde"] }
 matchit = "0.7"
+rquickjs = { version = "0.6.2", features = ["full"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_yaml = "0.9.34"
 thiserror = "1.0.61"
 tokio = { workspace = true }
 tracing = { workspace = true }
+typed-builder = "0.18.2"
 
 [dev-dependencies]
 tracing-subscriber = { workspace = true }
