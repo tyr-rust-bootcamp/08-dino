@@ -1,8 +1,13 @@
 [workspace]
-members = ["bundler", "dino", "dino-macros"]
+members = ["bundler", "dino", "dino-macros", "dino-server"]
 resolver = "2"
 
 
 [workspace.dependencies]
 bundler = { path = "bundler" }
 dino-macros = { path = "dino-macros" }
+serde = { version = "1.0.203", features = ["derive"] }
+serde_json = "1.0.117"
+tokio = { version = "1.37.0", features = ["rt", "rt-multi-thread", "macros"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

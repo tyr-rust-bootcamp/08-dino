@@ -1,0 +1,13 @@
+---
+name: dino-test
+routes:
+  /api/hello/:id:
+    - method: GET
+      handler: hello1
+    - method: POST
+      handler: hello2
+  /api/:name/:id:
+    - method: GET
+      handler: handler1
+    - method: POST
+      handler: handler2
