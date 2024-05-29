@@ -127,9 +127,8 @@ impl AppRouterInner {
 
 #[cfg(test)]
 mod tests {
-    use crate::ProjectConfig;
-
     use super::*;
+    use crate::ProjectConfig;
 
     #[test]
     fn app_router_match_should_work() {

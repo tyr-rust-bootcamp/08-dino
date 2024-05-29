@@ -105,13 +105,13 @@ mod tests {
     #[test]
     fn process_from_js_should_work() {
         let input = r#"
-          #[derive(FromJs)]
-          struct Request {
-            method: String,
-            url: String,
-            headers: HashMap<String, String>,
-            body: Option<String>,
-          }
+            #[derive(FromJs)]
+            struct Request {
+                method: String,
+                url: String,
+                headers: HashMap<String, String>,
+                body: Option<String>,
+            }
         "#;
 
         let parsed = syn::parse_str(input).unwrap();
@@ -126,13 +126,13 @@ mod tests {
     #[test]
     fn process_into_js_should_work() {
         let input = r#"
-          #[derive(IntoJs)]
-          struct Request {
-            method: String,
-            url: String,
-            headers: HashMap<String, String>,
-            body: Option<String>,
-          }
+            #[derive(IntoJs)]
+            struct Request {
+                method: String,
+                url: String,
+                headers: HashMap<String, String>,
+                body: Option<String>,
+            }
         "#;
 
         let parsed = syn::parse_str(input).unwrap();
